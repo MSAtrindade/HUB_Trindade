@@ -2,7 +2,6 @@ import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from threading import Lock
 
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
@@ -10,8 +9,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "hub_local.db"
-_db_ready = False
-_db_lock = Lock()
 
 def db():
     conn = sqlite3.connect(DB_PATH)
@@ -129,32 +126,30 @@ def get_me():
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-    init_db()
-except Exception as e:
-    print("init_db() falhou:", e)
-
 # Local: permite front Vite
 CORS(
     app,
-    origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    origins=os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(","),
     supports_credentials=True,
 )
 
 # Sessão/cookie para cross-site (mesmo no local ajuda)
+# Sessão/cookie (para Vercel -> Railway precisa cross-site)
+is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") == "production"
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",   # no local ok; em Vercel/Railway vira "None" + Secure
+    SESSION_COOKIE_SAMESITE="None" if is_prod else "Lax",
+    SESSION_COOKIE_SECURE=True if is_prod else False,
 )
 
-@app.before_request
-def _startup_once():
-    global _db_ready
-    if _db_ready:
-        return
-    with _db_lock:
-        if not _db_ready:
-            init_db()
-            _db_ready = True
+# Inicializa banco uma vez no boot (compatível com Flask 3.x / Gunicorn)
+try:
+    init_db()
+except Exception as e:
+    # Em Railway o FS é efêmero; se der erro ainda assim o app sobe e loga o motivo
+    print(f"[init_db] erro: {e}")
+
 
 @app.get("/health")
 def health():
@@ -416,7 +411,4 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
-
-
-
 
