@@ -1,0 +1,599 @@
+html, body{
+  background: linear-gradient(rgba(8,20,50,.85), rgba(8,20,50,.90)),
+              url("/assets/images/background_v3.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* HUB Trindade Mineração - Custom Styles */
+
+:root{
+  --bg-0:#0A1F44;
+  --bg-1:#0E2A66;
+  --card:rgba(10,25,60,.82);
+  --border:rgba(0,200,255,.18);
+  --text:#EAF2FF;
+  --muted:#9BB3D1;
+
+  --primary:#00C8FF;
+  --primary-2:#007BFF;
+  --accent:#00E0B8;
+
+  --shadow: 0 12px 35px rgba(0,0,0,.45);
+  --radius: 14px;
+}
+
+body{
+  background: linear-gradient(rgba(8,20,50,.85), rgba(8,20,50,.90)),
+              url("/assets/images/background_v3.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: -1;
+    pointer-events: none;
+}
+
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.table {
+    background-color: white;
+    border-radius: 8px;
+}
+
+.badge {
+    padding: 0.4em 0.6em;
+    font-weight: 500;
+}
+
+/* Login page */
+.card.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* KPI Cards */
+.card.border-danger {
+    border-width: 2px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+}
+
+/* Signature Canvas */
+#signatureCanvas {
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    h1,h2,h3,h4{
+  color: var(--text);
+  letter-spacing: .2px;
+}
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading states */
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Modal improvements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/* List groups */
+.list-group-item {
+    border-radius: 8px !important;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0,0,0,.125);
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Icon spacing */
+.bi {
+    margin-right: 0.3rem;
+}
+
+/* Dashboard stats */
+.card-header {
+    font-weight: 600;
+}
+
+/* Tables in cards */
+.card .table {
+    margin-bottom: 0;
+}
+
+.card .table thead th {
+    border-top: none;
+}
+
+
+/* Brand mark (truck icon) */
+.brand-mark{width:72px;height:72px;display:block;margin:0 auto 14px auto;}
+
+
+.muted{color:var(--muted);} .text-muted{color:var(--muted);} 
+
+
+/* --- TEXT FIX FOR CARDS (White for readability) --- */
+.card h3,
+.card h4,
+.card h5,
+.card .card-title {
+    color: #FFFFFF !important;
+}
+
+.card p,
+.card small {
+    color: #EAF2FF !important;
+}
+
+/* --- LOGIN PAGE TEXT FIX --- */
+.login-container h1,
+.login-container h2,
+.login-container label {
+    color: #FFFFFF !important;
+}
+
+.login-container small,
+.login-container .muted {
+    color: #D0E6FF !important;
+}
+
+
+
+/* --- FIX: LOGIN LABELS (E-mail / Senha) --- */
+form label,
+.login-card label,
+.login-container label,
+.auth-card label,
+label[for="email"],
+label[for="password"]{
+  color:#FFFFFF !important;
+  font-weight:600;
+  opacity: .95;
+}
+
+
+
+/* === CONTRASTE PROFISSIONAL AUTOMÁTICO === */
+.card, .modal-content {
+    color: #ffffff !important;
+}
+
+.card.bg-white, .modal-content.bg-white {
+    color: #1b1f2a !important;
+}
+
+label {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.footer-global {
+    background: rgba(10, 18, 45, 0.85);
+    color: #ffffff;
+    text-align: center;
+    padding: 14px;
+}
+
+
+/* ===============================
+   ENTERPRISE MINING THEME
+   =============================== */
+
+:root {
+    --primary: #0b3d91;
+    --secondary: #0057b8;
+    --accent: #00b4d8;
+    --success: #1e7f4f;
+    --warning: #f4c430;
+    --danger: #c62828;
+    --text-light: #ffffff;
+    --text-dark: #1c1f26;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.navbar {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.card {
+    background: rgba(15, 35, 75, 0.92);
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.card h1, .card h2, .card h3 {
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--secondary), var(--accent));
+    border: none;
+}
+
+.btn-success {
+    background: var(--success);
+    border: none;
+}
+
+.btn-warning {
+    background: var(--warning);
+    border: none;
+    color: #000;
+}
+
+.footer-global {
+    background: linear-gradient(90deg, #0a1a3a, #0b3d91);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+h1, h2 {
+    letter-spacing: 0.5px;
+}
+
+
+
+/* ===== FIX CONTRASTE MODAL E CARDS ===== */
+
+/* Modal fundo branco com texto escuro forte */
+.modal-content {
+    background: #ffffff !important;
+    color: #1c1f26 !important;
+}
+
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content label,
+.modal-content p {
+    color: #1c1f26 !important;
+    font-weight: 500;
+}
+
+/* Inputs dentro do modal */
+.modal-content input,
+.modal-content textarea {
+    background: #f4f6fa !important;
+    color: #1c1f26 !important;
+    border: 1px solid #cfd6e4 !important;
+}
+
+/* Cards escuros com texto branco visível */
+.card {
+    color: #ffffff !important;
+}
+
+.card h1, .card h2, .card h3, .card p {
+    color: #ffffff !important;
+}
+
+/* Footer escuro elegante */
+.footer-global {
+    background: #0b1f45 !important;
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   MOBILE-FIRST (AUTO AJUSTE FINO)
+   ========================================================= */
+.container{ width:min(1160px, calc(100% - 28px)); margin:0 auto; }
+
+/* Cards grid: 3 -> 2 -> 1 */
+.cards-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+@media (max-width:1024px){ .cards-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:640px){ .cards-grid{ grid-template-columns:1fr; gap:12px; } }
+
+/* Navbar responsive */
+.topbar, .navbar{ position:sticky; top:0; z-index:50; backdrop-filter:blur(10px); }
+.nav-toggle{
+  display:none; appearance:none;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,18,45,.45);
+  color:#fff; border-radius:12px;
+  padding:10px 12px; line-height:1;
+}
+.nav-items{ display:flex; align-items:center; gap:10px; }
+@media (max-width:860px){
+  .nav-toggle{ display:inline-flex; align-items:center; justify-content:center; }
+  .nav-items{
+    display:none; position:absolute; left:14px; right:14px; top:58px;
+    padding:12px; border-radius:14px;
+    background:rgba(10,18,45,.92);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 16px 40px rgba(0,0,0,.45);
+    flex-direction:column; align-items:stretch;
+  }
+  .nav-items.open{ display:flex; }
+  .nav-items a, .nav-items button{ width:100%; text-align:left; }
+}
+
+/* Modal sizing */
+.modal-content{ width:min(720px, calc(100% - 26px)); }
+@media (max-width:640px){
+  .modal-content{ width:calc(100% - 18px); max-height:calc(100vh - 22px); overflow:auto; }
+}
+
+/* Touch targets */
+button, .btn, .btn-primary, .btn-secondary{ min-height:40px; }
+
+/* Footer */
+.footer-global{ margin-top:18px; border-top:1px solid rgba(255,255,255,.08); }
+
+
+/* PWA Install button */
+.btn-install{
+  margin-left: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(10,18,45,.45);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* ===== Enterprise UX fixes ===== */
+body { padding-bottom: 64px; } /* espaço para footer fixo */
+
+.footer-global{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+/* Botão de menu (mobile) como ícone 4-quadrados */
+.nav-toggle{
+  width: 44px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(8, 22, 46, .35);
+  color: #fff;
+}
+.nav-toggle-icon{
+  width: 18px;
+  height: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+}
+.nav-toggle-icon::before,
+.nav-toggle-icon::after{
+  content: "";
+  display: block;
+}
+.nav-toggle-icon{
+  background: transparent;
+}
+.nav-toggle-icon span{ display:none; }
+.nav-toggle-icon{
+  --c: rgba(255,255,255,.9);
+}
+.nav-toggle-icon::before{
+  box-shadow:
+    0 0 0 0 var(--c),
+    10px 0 0 0 var(--c),
+    0 10px 0 0 var(--c),
+    10px 10px 0 0 var(--c);
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+/* Modal com fundo branco: textos escuros para legibilidade */
+.modal .modal-content,
+.modal .modal-body,
+.modal .modal-header,
+.modal .modal-footer{
+  color: #0b1b34 !important;
+}
+.modal .modal-title,
+.modal h1, .modal h2, .modal h3, .modal label, .modal p, .modal small{
+  color: #0b1b34 !important;
+}
+.modal input, .modal textarea, .modal select{
+  color: #0b1b34 !important;
+}
+
+
+
+/* Sticky footer layout */
+html, body { height: 100%; }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1 0 auto; }
+.footer-global { margin-top: auto; }
+
+
+/* ===== React Layout (Topbar + Hero) ===== */
+.hub-bg {
+  min-height: 100vh;
+  background: url("/assets/images/background_v3.jpg") center/cover no-repeat fixed;
+}
+
+.hub-topbar {
+  background: linear-gradient(90deg, rgba(0, 90, 200, 0.92), rgba(0, 140, 255, 0.75));
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+}
+
+.hub-topbar .nav-link {
+  color: rgba(255,255,255,0.88);
+  border-radius: 10px;
+  margin: 0 4px;
+}
+
+.hub-topbar .nav-link.active,
+.hub-topbar .nav-link:hover {
+  color: #fff;
+  background: rgba(0,0,0,0.18);
+}
+
+.btn-hub-install{
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  border-radius: 12px;
+}
+
+.btn-hub-install:hover{
+  background: rgba(0,0,0,0.28);
+  color: #fff;
+}
+
+.hub-content {
+  padding-top: 18px;
+}
+
+.hub-footer{
+  text-align:center;
+  color: rgba(255,255,255,0.9);
+  padding: 16px 10px 22px;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+.hub-hero{
+  color:#fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+.hub-title{
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-top: 18px;
+}
+
+@media (max-width: 992px){
+  .hub-title{ font-size: 38px; }
+}
+
+.hub-subtitle{
+  font-size: 20px;
+  color: rgba(255,255,255,0.86);
+  margin-top: 10px;
+}
+
+.hub-welcome{
+  background: rgba(212, 237, 218, 0.92);
+  border-color: rgba(195, 230, 203, 0.75);
+  max-width: 1220px;
+}
+
+.hub-card{
+  background: rgba(10, 25, 55, 0.78);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.hub-card .card-body{
+  padding: 34px 22px;
+}
+
+.hub-card-icon{
+  font-size: 54px;
+  margin-bottom: 12px;
+}
+
+.hub-card-title{
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.hub-card-muted{
+  color: rgba(255,255,255,0.8);
+}
