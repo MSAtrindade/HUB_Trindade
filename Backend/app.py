@@ -139,6 +139,10 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",   # no local ok; em Vercel/Railway vira "None" + Secure
 )
 
+@app.before_first_request
+def _startup():
+    init_db()
+
 @app.get("/health")
 def health():
     return jsonify({"ok": True})
@@ -399,4 +403,5 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
+
 
