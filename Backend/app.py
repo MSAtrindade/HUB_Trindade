@@ -155,6 +155,17 @@ except Exception as e:
 def health():
     return jsonify({"ok": True})
 
+
+@app.get("/")
+def root():
+    # Endpoint raiz para Railway (evita 404 no domínio)
+    return jsonify({
+        "ok": True,
+        "service": "HUB Trindade Backend",
+        "health": "/health",
+        "api_base": "/api",
+    })
+
 @app.get("/api/me")
 def api_me():
     user = get_me()
