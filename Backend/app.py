@@ -129,6 +129,10 @@ def get_me():
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
+    init_db()
+except Exception as e:
+    print("init_db() falhou:", e)
+
 # Local: permite front Vite
 CORS(
     app,
@@ -412,6 +416,7 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
