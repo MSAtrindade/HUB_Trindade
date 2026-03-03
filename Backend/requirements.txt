@@ -1,4 +1,4 @@
-Flask==3.0.3
-flask-cors==4.0.1
-gunicorn
-Werkzeug==3.0.3
+Flask==2.3.3
+Werkzeug==2.3.8
+flask-cors==4.0.0
+gunicorn==21.2.0
