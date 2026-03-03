@@ -2,6 +2,7 @@ import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
@@ -9,6 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "hub_local.db"
+_db_ready = False
+_db_lock = Lock()
 
 def db():
     conn = sqlite3.connect(DB_PATH)
@@ -139,9 +142,15 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",   # no local ok; em Vercel/Railway vira "None" + Secure
 )
 
-@app.before_first_request
-def _startup():
-    init_db()
+@app.before_request
+def _startup_once():
+    global _db_ready
+    if _db_ready:
+        return
+    with _db_lock:
+        if not _db_ready:
+            init_db()
+            _db_ready = True
 
 @app.get("/health")
 def health():
@@ -403,5 +412,6 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
+
 
 
