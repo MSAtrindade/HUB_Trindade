@@ -147,7 +147,7 @@ export function AppShell() {
       </main>
 
       <footer className="hub-footer">
-        © {new Date().getFullYear()} HUB Trindade Mineração | Todos os direitos reservados
+        © {new Date().getFullYear()} HUB Trindade Mineração | Eduardo Martins & Rudgere Germano
       </footer>
     </div>
   );
