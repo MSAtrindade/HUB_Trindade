@@ -124,12 +124,18 @@ def get_me():
     return dict(row)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+app.secret_key = os.environ.get("SECRET_KEY", "Trindade26")
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://hub-trindade.vercel.app",
+]
 
 # Local: permite front Vite
 CORS(
     app,
-    origins=os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(","),
+    resources={r"/api/*": {"origins": origins}},
     supports_credentials=True,
 )
 
@@ -139,8 +145,8 @@ is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") =
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="None" if is_prod else "Lax",
-    SESSION_COOKIE_SECURE=True if is_prod else False,
+    SESSION_COOKIE_SAMESITE="None",
+    SESSION_COOKIE_SECURE=True,
 )
 
 # Inicializa banco uma vez no boot (compatível com Flask 3.x / Gunicorn)
@@ -422,4 +428,5 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
+
 
