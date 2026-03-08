@@ -59,6 +59,7 @@ def init_db():
 
     conn.commit()
 
+    # Seed admin
     cur.execute("SELECT id FROM users WHERE email = ?", ("admin@local",))
     if not cur.fetchone():
         cur.execute(
@@ -66,6 +67,7 @@ def init_db():
             ("Admin", "admin@local", generate_password_hash("admin123"), "admin"),
         )
 
+    # Seed user
     cur.execute("SELECT id FROM users WHERE email = ?", ("user@local",))
     if not cur.fetchone():
         cur.execute(
@@ -73,20 +75,28 @@ def init_db():
             ("Usuário", "user@local", generate_password_hash("user123"), "user"),
         )
 
+    # Seed sectors/kpis
     cur.execute("SELECT COUNT(*) as c FROM sectors")
     if cur.fetchone()["c"] == 0:
-        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)", ("CCO", "KPIs do Centro de Controle Operacional"))
-        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)", ("Planta", "KPIs da Produção da Planta"))
-        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)", ("Mina", "KPIs de Lavra e Frota"))
+        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)",
+                    ("CCO", "KPIs do Centro de Controle Operacional"))
+        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)",
+                    ("Planta", "KPIs da Produção da Planta"))
+        cur.execute("INSERT INTO sectors (name, description) VALUES (?,?)",
+                    ("Mina", "KPIs de Lavra e Frota"))
 
         conn.commit()
 
         cur.execute("SELECT id, name FROM sectors")
         sec = {r["name"]: r["id"] for r in cur.fetchall()}
 
-        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)", (sec["CCO"], "UF / DF • Frota", "Disponibilidade Física e Utilização Física por equipamento.", None))
-        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)", (sec["Planta"], "Produção Hora a Hora", "Ton/H por faixa de horário e comparativo de meta.", None))
-        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)", (sec["Mina"], "ROM • Viagens", "Total de viagens e ROM por turno/dia.", None))
+        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)",
+                    (sec["CCO"], "UF / DF • Frota", "Disponibilidade Física e Utilização Física por equipamento.", None))
+        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)",
+                    (sec["Planta"], "Produção Hora a Hora", "Ton/H por faixa de horário e comparativo de meta.", None))
+        cur.execute("INSERT INTO kpis (sector_id, title, description, pdf_url) VALUES (?,?,?,?)",
+                    (sec["Mina"], "ROM • Viagens", "Total de viagens e ROM por turno/dia.", None))
+
         conn.commit()
 
     conn.close()
@@ -113,14 +123,6 @@ def get_me():
         return None
     return dict(row)
 
-def sector_payload(row):
-    return {
-        "id": row["id"],
-        "name": row["name"],
-        "description": row["description"],
-        "kpi_count": row["kpi_count"],
-    }
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "Trindade26")
 
@@ -130,7 +132,16 @@ origins = [
     "https://hub-trindade.vercel.app",
 ]
 
-CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
+# Local: permite front Vite
+CORS(
+    app,
+    resources={r"/api/*": {"origins": origins}},
+    supports_credentials=True,
+)
+
+# Sessão/cookie para cross-site (mesmo no local ajuda)
+# Sessão/cookie (para Vercel -> Railway precisa cross-site)
+is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") == "production"
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
@@ -138,18 +149,28 @@ app.config.update(
     SESSION_COOKIE_SECURE=True,
 )
 
+# Inicializa banco uma vez no boot (compatível com Flask 3.x / Gunicorn)
 try:
     init_db()
 except Exception as e:
+    # Em Railway o FS é efêmero; se der erro ainda assim o app sobe e loga o motivo
     print(f"[init_db] erro: {e}")
+
 
 @app.get("/health")
 def health():
     return jsonify({"ok": True})
 
+
 @app.get("/")
 def root():
-    return jsonify({"ok": True, "service": "HUB Trindade Backend", "health": "/health", "api_base": "/api"})
+    # Endpoint raiz para Railway (evita 404 no domínio)
+    return jsonify({
+        "ok": True,
+        "service": "HUB Trindade Backend",
+        "health": "/health",
+        "api_base": "/api",
+    })
 
 @app.get("/api/me")
 def api_me():
@@ -176,6 +197,7 @@ def api_login():
 
     session["user_id"] = u["id"]
     session["role"] = u["role"]
+
     return jsonify({"ok": True, "user": {"id": u["id"], "name": u["name"], "email": u["email"], "role": u["role"]}})
 
 @app.post("/api/auth/logout")
@@ -193,10 +215,9 @@ def api_home():
     cur.execute("SELECT COUNT(*) c FROM sectors"); sectors = cur.fetchone()["c"]
     cur.execute("SELECT COUNT(*) c FROM kpis"); kpis = cur.fetchone()["c"]
     cur.execute("SELECT COUNT(*) c FROM requests"); reqs = cur.fetchone()["c"]
-    cur.execute("SELECT COUNT(*) c FROM kpis WHERE sector_id IS NULL"); kpis_no_sector = cur.fetchone()["c"]
     conn.close()
 
-    return jsonify({"sectors": sectors, "kpis": kpis, "requests": reqs, "kpis_no_sector": kpis_no_sector})
+    return jsonify({"sectors": sectors, "kpis": kpis, "requests": reqs})
 
 @app.get("/api/sectors")
 def api_sectors():
@@ -222,6 +243,7 @@ def api_sector_kpis(sector_id: int):
 
     conn = db()
     cur = conn.cursor()
+
     cur.execute("SELECT id, name, description FROM sectors WHERE id = ?", (sector_id,))
     sector = cur.fetchone()
     if not sector:
@@ -237,6 +259,7 @@ def api_sector_kpis(sector_id: int):
     """, (sector_id,))
     kpis = [dict(r) for r in cur.fetchall()]
     conn.close()
+
     return jsonify({"sector": dict(sector), "kpis": kpis})
 
 @app.get("/api/kpis/<int:kpi_id>")
@@ -246,7 +269,11 @@ def api_kpi(kpi_id: int):
 
     conn = db()
     cur = conn.cursor()
-    cur.execute("SELECT id, sector_id, title, description, pdf_url FROM kpis WHERE id = ?", (kpi_id,))
+    cur.execute("""
+      SELECT id, sector_id, title, description, pdf_url
+      FROM kpis
+      WHERE id = ?
+    """, (kpi_id,))
     kpi = cur.fetchone()
     conn.close()
 
@@ -263,6 +290,8 @@ def api_requests_list():
 
     conn = db()
     cur = conn.cursor()
+
+    # admin vê tudo, user vê só suas
     role = session.get("role", "user")
     if role == "admin":
         cur.execute("""
@@ -317,8 +346,10 @@ def api_requests_create():
     """, (uid, sector_id, title, details, now_iso()))
     conn.commit()
     conn.close()
+
     return jsonify({"ok": True}), 201
 
+# Admin endpoints (simples só pra não quebrar as telas)
 def require_admin():
     if not require_auth():
         return False
@@ -333,9 +364,8 @@ def api_admin_dashboard():
     cur.execute("SELECT COUNT(*) c FROM sectors"); sectors = cur.fetchone()["c"]
     cur.execute("SELECT COUNT(*) c FROM kpis"); kpis = cur.fetchone()["c"]
     cur.execute("SELECT COUNT(*) c FROM requests"); reqs = cur.fetchone()["c"]
-    cur.execute("SELECT COUNT(*) c FROM requests WHERE status IN ('aberta', 'open')"); open_requests = cur.fetchone()["c"]
     conn.close()
-    return jsonify({"users": users, "sectors": sectors, "kpis": kpis, "requests": reqs, "open_requests": open_requests})
+    return jsonify({"users": users, "sectors": sectors, "kpis": kpis, "requests": reqs})
 
 @app.get("/api/admin/users")
 def api_admin_users():
@@ -347,92 +377,59 @@ def api_admin_users():
     conn.close()
     return jsonify({"users": data})
 
+@app.post("/api/admin/users")
+def api_admin_users_create():
+    if not require_admin():
+        return jsonify({"ok": False, "error": "Sem permissão"}), 403
+
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    role = (data.get("role") or "user").strip().lower()
+
+    if not name:
+        return jsonify({"ok": False, "error": "Informe o nome"}), 400
+    if not email:
+        return jsonify({"ok": False, "error": "Informe o e-mail"}), 400
+    if not password or len(password) < 4:
+        return jsonify({"ok": False, "error": "A senha deve ter pelo menos 4 caracteres"}), 400
+    if role not in ("admin", "user"):
+        role = "user"
+
+    conn = db(); cur = conn.cursor()
+    cur.execute("SELECT id FROM users WHERE email = ?", (email,))
+    if cur.fetchone():
+        conn.close()
+        return jsonify({"ok": False, "error": "Já existe um usuário com este e-mail"}), 409
+
+    cur.execute(
+        "INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)",
+        (name, email, generate_password_hash(password), role),
+    )
+    user_id = cur.lastrowid
+    conn.commit()
+    cur.execute("SELECT id, name, email, role FROM users WHERE id = ?", (user_id,))
+    created = dict(cur.fetchone())
+    conn.close()
+    return jsonify({"ok": True, "user": created}), 201
+
 @app.get("/api/admin/sectors")
 def api_admin_sectors():
     if not require_admin():
         return jsonify({"ok": False, "error": "Sem permissão"}), 403
     conn = db(); cur = conn.cursor()
-    cur.execute("""
-      SELECT s.id, s.name, s.description,
-             (SELECT COUNT(*) FROM kpis k WHERE k.sector_id = s.id) as kpi_count
-      FROM sectors s
-      ORDER BY s.name
-    """)
-    data = [sector_payload(r) for r in cur.fetchall()]
+    cur.execute("SELECT id, name, description FROM sectors ORDER BY name")
+    data = [dict(r) for r in cur.fetchall()]
     conn.close()
     return jsonify({"sectors": data})
-
-@app.post("/api/admin/sectors")
-def api_admin_sector_create():
-    if not require_admin():
-        return jsonify({"ok": False, "error": "Sem permissão"}), 403
-
-    data = request.get_json(force=True, silent=True) or {}
-    name = (data.get("name") or "").strip()
-    description = (data.get("description") or "").strip()
-
-    if not name:
-        return jsonify({"ok": False, "error": "Informe o nome do setor"}), 400
-
-    conn = db(); cur = conn.cursor()
-    cur.execute("SELECT id FROM sectors WHERE LOWER(name) = LOWER(?)", (name,))
-    if cur.fetchone():
-        conn.close()
-        return jsonify({"ok": False, "error": "Já existe um setor com esse nome"}), 409
-
-    cur.execute("INSERT INTO sectors (name, description) VALUES (?, ?)", (name, description))
-    new_id = cur.lastrowid
-    conn.commit()
-    cur.execute("SELECT id, name, description, 0 as kpi_count FROM sectors WHERE id = ?", (new_id,))
-    row = cur.fetchone()
-    conn.close()
-    return jsonify({"ok": True, "sector": sector_payload(row)}), 201
-
-@app.put("/api/admin/sectors/<int:sector_id>")
-def api_admin_sector_update(sector_id: int):
-    if not require_admin():
-        return jsonify({"ok": False, "error": "Sem permissão"}), 403
-
-    data = request.get_json(force=True, silent=True) or {}
-    name = (data.get("name") or "").strip()
-    description = (data.get("description") or "").strip()
-
-    if not name:
-        return jsonify({"ok": False, "error": "Informe o nome do setor"}), 400
-
-    conn = db(); cur = conn.cursor()
-    cur.execute("SELECT id FROM sectors WHERE id = ?", (sector_id,))
-    if not cur.fetchone():
-        conn.close()
-        return jsonify({"ok": False, "error": "Setor não encontrado"}), 404
-
-    cur.execute("SELECT id FROM sectors WHERE LOWER(name) = LOWER(?) AND id <> ?", (name, sector_id))
-    if cur.fetchone():
-        conn.close()
-        return jsonify({"ok": False, "error": "Já existe outro setor com esse nome"}), 409
-
-    cur.execute("UPDATE sectors SET name = ?, description = ? WHERE id = ?", (name, description, sector_id))
-    conn.commit()
-    cur.execute("""
-      SELECT s.id, s.name, s.description,
-             (SELECT COUNT(*) FROM kpis k WHERE k.sector_id = s.id) as kpi_count
-      FROM sectors s WHERE s.id = ?
-    """, (sector_id,))
-    row = cur.fetchone()
-    conn.close()
-    return jsonify({"ok": True, "sector": sector_payload(row)})
 
 @app.get("/api/admin/kpis")
 def api_admin_kpis():
     if not require_admin():
         return jsonify({"ok": False, "error": "Sem permissão"}), 403
     conn = db(); cur = conn.cursor()
-    cur.execute("""
-      SELECT k.id, k.sector_id, k.title, k.description, k.pdf_url, s.name as sector_name
-      FROM kpis k
-      LEFT JOIN sectors s ON s.id = k.sector_id
-      ORDER BY k.id DESC
-    """)
+    cur.execute("SELECT id, sector_id, title, description, pdf_url FROM kpis ORDER BY id DESC")
     data = [dict(r) for r in cur.fetchall()]
     conn.close()
     return jsonify({"kpis": data})
@@ -441,20 +438,13 @@ def api_admin_kpis():
 def api_admin_assign():
     if not require_admin():
         return jsonify({"ok": False, "error": "Sem permissão"}), 403
-    return jsonify({"ok": True, "note": "Placeholder: permissões por setor/kpi", "items": [
-        {"module": "Setores", "status": "Ativo", "description": "Controle de acesso por setor."},
-        {"module": "KPIs", "status": "Em planejamento", "description": "Permissões finas por indicador."},
-        {"module": "Solicitações", "status": "Ativo", "description": "Fluxo administrativo centralizado."},
-    ]})
+    return jsonify({"ok": True, "note": "Placeholder: permissões por setor/kpi"})
 
 @app.get("/api/admin/logs")
 def api_admin_logs():
     if not require_admin():
         return jsonify({"ok": False, "error": "Sem permissão"}), 403
-    return jsonify({"ok": True, "items": [
-        {"level": "INFO", "message": "Backend inicializado com sucesso.", "created_at": now_iso()},
-        {"level": "INFO", "message": "Módulo de administração disponível.", "created_at": now_iso()},
-    ]})
+    return jsonify({"ok": True, "note": "Placeholder: logs"})
 
 @app.get("/api/admin/requests")
 def api_admin_requests():
@@ -462,10 +452,9 @@ def api_admin_requests():
         return jsonify({"ok": False, "error": "Sem permissão"}), 403
     conn = db(); cur = conn.cursor()
     cur.execute("""
-      SELECT r.*, u.name as user_name, s.name as sector_name
+      SELECT r.*, u.name as user_name
       FROM requests r
       JOIN users u ON u.id = r.user_id
-      LEFT JOIN sectors s ON s.id = r.sector_id
       ORDER BY r.id DESC
       LIMIT 200
     """)
@@ -476,3 +465,5 @@ def api_admin_requests():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
+
+
